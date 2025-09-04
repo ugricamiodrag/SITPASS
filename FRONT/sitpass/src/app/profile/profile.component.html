@@ -1,0 +1,48 @@
+<div class="container-fluid">
+  <div class="row primer">
+    <div class="col">
+      <app-navbar-admin *ngIf="role === 'ROLE_ADMIN'"></app-navbar-admin>
+      <app-navbar-user *ngIf="role === 'ROLE_USER'"></app-navbar-user>
+      <app-navbar-manager *ngIf="role === 'ROLE_MANAGER'"></app-navbar-manager>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid profile-container">
+  <div class="profile-buttons">
+    <button (click)="changeSection('information')" *ngIf="selectedSection !== 'information'" class="btn btn-primary">Change main information</button>
+    <button (click)="changeSection('changePassword')" *ngIf="selectedSection !== 'changePassword'" class="btn btn-secondary">Change password</button>
+    <button (click)="changeSection('reviews')" *ngIf="role === 'ROLE_USER' && selectedSection !== 'reviews'" class="btn btn-success">See your reviews</button>
+    <button (click)="changeSection('visited')" *ngIf="role === 'ROLE_USER' && selectedSection !== 'visited'" class="btn btn-light">The facilities you have visited</button>
+    <button (click)="changeSection('managed')" *ngIf="role === 'ROLE_MANAGER' && selectedSection !== 'managed'" class="btn btn-light">The facilities you manage</button>
+  </div>
+
+  <div *ngIf="selectedSection === 'information'" class="profile-section">
+    <app-profile-information [user]="user"></app-profile-information>
+  </div>
+
+  <div *ngIf="selectedSection === 'changePassword'" class="profile-section">
+    <app-change-password></app-change-password>
+  </div>
+
+  <div *ngIf="selectedSection === 'reviews'" class="profile-section">
+    <app-reviews-page [userId]="user.id!"></app-reviews-page>
+  </div>
+
+  <div *ngIf="selectedSection === 'visited'" class="profile-section">
+    <div *ngIf="visited && visited.length > 0">
+    <div *ngFor="let facility of visited">
+      <app-facility-card [facility]="facility"></app-facility-card>
+    </div>
+    </div>
+    <div *ngIf="visited.length === 0">
+      <h3 class="faded-big-text">You haven't visited any facilities yet.</h3>
+    </div>
+  </div>
+
+
+  <div *ngIf="selectedSection === 'managed'" class="profile-section">
+    <app-facilities></app-facilities>
+  </div>
+
+</div>

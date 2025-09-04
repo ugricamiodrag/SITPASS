@@ -1,0 +1,12 @@
+<div *ngFor="let comment of replies">
+  <div class="comment-box">
+    <p class="username">{{ comment.username }}</p>
+    <p class="comment-text">{{ comment.comment }}</p>
+    <p class="created-at">{{ comment.createdAt | date:'medium' }}</p>
+    <button *ngIf="!canReply(comment.id)" (click)="replyToComment(comment.id)">Reply</button>
+
+    <div *ngIf="comment.replies && comment.replies.length > 0" class="replies">
+      <app-comment [comments]="comment.replies" [commentAuthors]="commentAuthors" [loggedInUserId]="loggedInUserId!" (replyEvent)="replyToComment($event)"></app-comment>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<div class="facility-container" *ngIf="facility">
+  <div class="facility-card">
+    <div class="facility-content">
+      <div class="facility-left">
+        <div class="facility-info">
+          <h3>{{ facility.name }}</h3>
+          <p>{{ facility.description }}</p>
+          <p>{{ facility.address }}, {{ facility.city }}</p>
+          <p *ngIf="facility.totalRating > 0">Average rating: {{ facility.totalRating | number:'1.2-2' }}</p>
+          <p *ngIf="facility.totalRating === 0">Be the first person to rate this facility!</p>
+
+          <p *ngIf="facility.workDays && facility.workDays.length">Working Hours:</p>
+          <ul *ngIf="facility.workDays && facility.workDays.length">
+            <li *ngFor="let day of facility.workDays">
+              {{ day.day }}: {{ day.from }} - {{ day.until }}
+            </li>
+          </ul>
+
+          <p *ngIf="facility.disciplines && facility.disciplines.length">Disciplines:</p>
+          <ul *ngIf="facility.disciplines && facility.disciplines.length">
+            <li *ngFor="let discipline of facility.disciplines">
+              {{ discipline.name }}
+            </li>
+          </ul>
+
+          <div class="facility-card-actions">
+            <button *ngIf="isAdmin() || isManager()" (click)="onEdit()">Edit</button>
+            <button *ngIf="isAdmin()" (click)="onDelete()">Delete</button>
+            <button *ngIf="isAdmin() && active" (click)="onHide()">Hide</button>
+            <button *ngIf="isAdmin() && !active" (click)="onUnhide()">Unhide</button>
+            <button *ngIf="isAdmin()" (click)="manage()">Manage</button>
+            <button *ngIf="isUser()" (click)="onMakeReservation()">Make Reservation</button>
+            <button *ngIf="isUser() && (hasBeenInFacility$ | async)" (click)="rateIt()">Rate it</button>
+            <button *ngIf="isManager()" (click)="openAnalytics()">Analytics</button>
+            <button (click)="openReviews()">All reviews</button>
+          </div>
+        </div>
+      </div>
+      <div class="facility-right" *ngIf="photoUrls.length">
+        <div class="facility-carousel">
+          <!-- Assuming app-image-carousel expects an array of SafeUrl -->
+          <app-image-carousel [images]="photoUrls"></app-image-carousel>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

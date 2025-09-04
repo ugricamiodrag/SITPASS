@@ -1,0 +1,28 @@
+.profile-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.profile-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.profile-buttons .btn {
+  margin: 0 10px;
+}
+
+.profile-section {
+  margin-top: 20px;
+}
+
+.faded-big-text {
+  font-size: 2em;
+  color: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  margin-top: 20px;
+}

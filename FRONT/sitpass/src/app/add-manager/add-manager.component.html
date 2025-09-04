@@ -1,0 +1,18 @@
+
+<div class="container">
+  <form [formGroup]="managerForm" (ngSubmit)="setManager()">
+    <div *ngIf="currentManager; else setManagerForm">
+      <p>Current Manager: {{ currentManager.user.email }}</p>
+      <button type="button" (click)="removeManager()">Remove Manager</button>
+    </div>
+    <ng-template #setManagerForm>
+      <div class="form-group">
+        <label for="email">Select Manager</label>
+        <select id="email" formControlName="email" class="form-control">
+          <option *ngFor="let user of users" [value]="user.email">{{ user.email }}</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="managerForm.invalid">Set Manager</button>
+    </ng-template>
+  </form>
+</div>

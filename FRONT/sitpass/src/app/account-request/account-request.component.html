@@ -1,0 +1,11 @@
+<div class="container mt-4">
+    <div class="card p-3">
+      <p class="font-weight-bold">Email: {{ request.email }}</p>
+      <p *ngIf="request.address" class="font-weight-bold">Address: {{ request.address }}</p>
+      <div class="mt-3">
+        <button class="btn btn-success mr-2" (click)="onAccept()">Accept</button>
+        <button class="btn btn-danger" (click)="onDecline()">Decline</button>
+      </div>
+    </div>
+  </div>
+  

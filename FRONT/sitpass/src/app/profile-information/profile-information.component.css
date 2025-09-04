@@ -1,0 +1,53 @@
+.profile-form-container {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.profile-form,
+.profile-picture-form {
+  flex: 1 1 100%;
+  max-width: 500px;
+  margin: 10px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+}
+
+.form-control {
+  border-radius: 4px;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+}
+
+.profile-picture-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-picture-form button {
+  margin-top: 10px;
+}
+
+.current-profile-picture {
+  margin-top: 20px;
+}
+
+.current-profile-picture img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

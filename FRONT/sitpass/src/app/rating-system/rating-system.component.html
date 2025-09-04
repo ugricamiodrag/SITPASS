@@ -1,0 +1,25 @@
+<form [formGroup]="ratingForm" (ngSubmit)="onSubmit()" class="rating-form">
+  <div class="form-group">
+    <label for="hygiene">Hygiene</label>
+    <app-star-rating formControlName="hygiene" id="hygiene"></app-star-rating>
+  </div>
+  <div class="form-group">
+    <label for="equipment">Equipment</label>
+    <app-star-rating formControlName="equipment" id="equipment"></app-star-rating>
+  </div>
+  <div class="form-group">
+    <label for="staff">Staff</label>
+    <app-star-rating formControlName="staff" id="staff"></app-star-rating>
+  </div>
+  <div class="form-group">
+    <label for="space">Space</label>
+    <app-star-rating formControlName="space" id="space"></app-star-rating>
+  </div>
+  <div class="form-group">
+    <label for="comment">Comment</label>
+    <textarea id="comment" formControlName="comment"></textarea>
+  </div>
+  <button type="submit" [disabled]="ratingForm.invalid" class="submit-button">Submit</button>
+</form>
+
+<pre>{{ ratingForm.value | json }}</pre>

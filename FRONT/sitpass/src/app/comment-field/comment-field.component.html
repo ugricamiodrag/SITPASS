@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Enter your reply</h2>
+<mat-dialog-content [formGroup]="commentForm">
+  <mat-form-field appearance="fill">
+    <mat-label>Comment</mat-label>
+    <textarea matInput formControlName="comment"></textarea>
+    <mat-error *ngIf="commentForm.controls['comment'].hasError('required')">
+      Comment is required
+    </mat-error>
+    <mat-error *ngIf="commentForm.controls['comment'].hasError('minlength')">
+      Comment must be at least 5 characters long
+    </mat-error>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button [disabled]="commentForm.invalid" (click)="onSubmit()">Submit</button>
+</mat-dialog-actions>

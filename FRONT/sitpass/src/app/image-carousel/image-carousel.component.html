@@ -1,0 +1,5 @@
+<div class="carousel">
+  <button (click)="showPreviousImage()">Previous</button>
+  <img [src]="images[currentIndex]" alt="Slide {{currentIndex + 1}}">
+  <button (click)="showNextImage()">Next</button>
+</div>

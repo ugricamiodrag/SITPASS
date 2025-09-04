@@ -1,0 +1,41 @@
+.comment-box {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.username {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.comment-text {
+  margin: 10px 0;
+  color: #555;
+}
+
+.created-at {
+  font-size: 0.9em;
+  color: #888;
+}
+
+.replies {
+  margin-left: 20px;
+  border-left: 2px solid #ddd;
+  padding-left: 10px;
+}
+
+.comment-box::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 50%;
+  position: absolute;
+  top: 20px;
+  left: -5px;
+}

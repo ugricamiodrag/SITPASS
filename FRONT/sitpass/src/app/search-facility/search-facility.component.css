@@ -1,0 +1,67 @@
+/* Form Styles */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form div {
+  margin-bottom: 1rem;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="time"],
+form select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form input[type="time"]:focus,
+form select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+form button[type="button"],
+form button[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+form button[type="button"]:hover,
+form button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+form button[type="button"]:nth-child(3) {
+  background-color: #dc3545;
+}
+
+form button[type="button"]:nth-child(3):hover {
+  background-color: #c82333;
+}

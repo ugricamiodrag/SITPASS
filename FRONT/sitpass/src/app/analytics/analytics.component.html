@@ -1,0 +1,49 @@
+<div class="analytics-container">
+  <h2>Facility Analytics</h2>
+
+  <div>
+    <button (click)="loadAnalyticsData('weekly')">Weekly</button>
+    <button (click)="loadAnalyticsData('monthly')">Monthly</button>
+    <button (click)="loadAnalyticsData('yearly')">Yearly</button>
+  </div>
+
+  <div>
+    <canvas baseChart
+            [datasets]="barChartData"
+            [labels]="barChartLabels"
+            [options]="barChartOptions"
+            [legend]="barChartLegend"
+            [type]="barChartType"
+            [plugins]="barChartPlugins">
+    </canvas>
+  </div>
+
+  <h3>Time Period Data</h3>
+  <div>
+    <button (click)="loadTimePeriodData('daily')">Daily</button>
+    <button (click)="loadTimePeriodData('weekly')">Weekly</button>
+    <button (click)="loadTimePeriodData('monthly')">Monthly</button>
+  </div>
+
+  <div>
+    <canvas baseChart
+            [datasets]="lineChartData"
+            [labels]="lineChartLabels"
+            [options]="barChartOptions"
+            [legend]="barChartLegend"
+            [type]="'line'"
+            [plugins]="barChartPlugins">
+    </canvas>
+  </div>
+
+  <h3>Custom Date Range</h3>
+  <form [formGroup]="customDateForm" (ngSubmit)="onCustomDateSubmit()">
+    <label for="startDate">Start Date</label>
+    <input type="date" id="startDate" formControlName="startDate">
+
+    <label for="endDate">End Date</label>
+    <input type="date" id="endDate" formControlName="endDate">
+
+    <button type="submit" [disabled]="customDateForm.invalid">Submit</button>
+  </form>
+</div>

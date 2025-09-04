@@ -1,0 +1,4 @@
+<button mat-raised-button color="primary" (click)="openCreateFacilityModal()" *ngIf="isAdmin()">Create Facility</button>
+<div *ngFor="let facility of facilities">
+  <app-facility-card [facility]="facility" (edit)="onEditFacility($event)" (hide)="onHideFacility($event)" (unhide)="onUnhideFacility($event)" (delete)="onDeleteFacility($event)"></app-facility-card>
+</div>

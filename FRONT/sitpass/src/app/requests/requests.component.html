@@ -1,0 +1,28 @@
+<div class="container-fluid">
+  
+    <div class="row primer">
+      <div class="col" >
+        <app-navbar-admin *ngIf="role === 'ROLE_ADMIN'"></app-navbar-admin>
+        <app-navbar-user *ngIf="role === 'ROLE_USER'"></app-navbar-user>
+        <app-navbar-manager *ngIf="role === 'ROLE_MANAGER'"></app-navbar-manager>
+      </div>
+    </div>
+  
+  
+  </div>
+
+
+<div class="container mt-4">
+    <div class="row">
+      <div class="col-md-6" *ngFor="let request of requests">
+        <div class="card mb-4">
+          <div class="card-body">
+            <app-account-request [request]="request" (accept)="onAccept($event)" (decline)="onDecline($event)"></app-account-request>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <app-pagination [totalItems]="totalItems" [pageSize]="pageSize" (pageSelected)="onPageSelected($event)"></app-pagination>
+  

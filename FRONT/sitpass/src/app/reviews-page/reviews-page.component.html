@@ -1,0 +1,40 @@
+<div class="reviews-container">
+  <h3>Reviews</h3>
+  <div class="sort-dropdown">
+    <label for="sortSelect">Sort by: </label>
+    <select id="sortSelect" #sortSelect (change)="changeSortField(sortSelect.value)">
+      <option value="createdAt" [selected]="sortField === 'createdAt'">Date</option>
+      <option value="staff" [selected]="sortField === 'staff'">Staff</option>
+      <option value="hygiene" [selected]="sortField === 'hygiene'">Hygiene</option>
+      <option value="equipment" [selected]="sortField === 'equipment'">Equipment</option>
+      <option value="space" [selected]="sortField === 'space'">Space</option>
+    </select>
+    <button (click)="toggleSortOrder()">
+      {{ sortOrder === 'asc' ? 'Asc ↑' : 'Desc ↓' }}
+    </button>
+
+
+  </div>
+  <div *ngFor="let review of reviews" class="review">
+    <div class="menu-container" *ngIf="userId || isManager">
+      <div class="menu-dots">...</div>
+      <div class="menu-options">
+        <button (click)="deleteReview(review.id!)">Delete</button>
+        <button *ngIf="isManager && !review.hidden" (click)="hide(review.id!, true)"> Hide </button>
+        <button *ngIf="isManager && review.hidden" (click)="hide(review.id!, false)"> Hide </button>
+       <button *ngIf="isManager && numberOfRepliesMap[review.comment?.id!] === 0" (click)="openCommentsModal(review.comment!.id!)">Reply</button>
+      </div>
+    </div>
+
+    <p><strong>{{ review.name }}</strong></p>
+    <p>Staff: {{ review.staff }}</p>
+    <p>Hygiene: {{ review.hygiene }}</p>
+    <p>Equipment: {{ review.equipment }}</p>
+    <p>Space: {{ review.space }}</p>
+    <p *ngIf="review.comment?.comment">Comment: {{ review.comment!.comment }}</p>
+    <p>Date: {{ review.createdAt | date: 'medium' }}</p>
+    <p>Exercise count: {{ review.exerciseCount }}</p>
+    <button *ngIf="numberOfRepliesMap[review.comment?.id!] > 0" (click)="seeReplies(review.comment?.id!)">See replies</button>
+    <hr>
+  </div>
+</div>

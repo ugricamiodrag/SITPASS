@@ -1,0 +1,45 @@
+<form (ngSubmit)="onSearch()">
+  <div>
+    <label for="city">City:</label>
+    <input id="city" type="text" [(ngModel)]="cityField" name="city" multiple size="50">
+  </div>
+
+  <div>
+    <label for="discipline">Discipline:</label>
+    <input id="discipline" [(ngModel)]="disciplineField" name="discipline" multiple>
+  </div>
+
+  <div>
+    <label for="minRating">Min Rating:</label>
+    <input id="minRating" type="number" [(ngModel)]="searchCriteria.minRating" name="minRating">
+  </div>
+
+  <div>
+    <label for="maxRating">Max Rating:</label>
+    <input id="maxRating" type="number" [(ngModel)]="searchCriteria.maxRating" name="maxRating">
+  </div>
+
+  <div *ngFor="let workDay of searchCriteria.workDaySearchCriteriaList; let i = index">
+    <div>
+      <label>Day of Week:</label>
+      <select [(ngModel)]="workDay.dayOfWeek" name="dayOfWeek-{{i}}">
+        <option *ngFor="let day of daysOfWeek" [value]="day">{{ day }}</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="startTime">Start Time:</label>
+      <input id="startTime" type="time" [(ngModel)]="workDay.startTime" name="startTime-{{i}}">
+    </div>
+
+    <div>
+      <label for="endTime">End Time:</label>
+      <input id="endTime" type="time" [(ngModel)]="workDay.endTime" name="endTime-{{i}}">
+    </div>
+
+    <button type="button" (click)="removeWorkDayCriteria(i)">Remove</button>
+  </div>
+
+  <button type="button" (click)="addWorkDayCriteria()">Add Work Day Criteria</button>
+  <button type="submit">Search</button>
+</form>
