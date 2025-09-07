@@ -66,6 +66,10 @@ public class SearchServiceImpl implements SearchService {
                 b.should(sb -> sb.match(
                         m -> m.field("name").fuzziness(Fuzziness.ONE.asString()).query(token)));
 
+                b.should(sb -> sb.match(
+                        m -> m.field("description").fuzziness(Fuzziness.ONE.asString()).query(token)
+                ));
+
                 // Match Query - full-text search in other fields
                 // Matches documents with full-text search in other fields
                 b.should(sb -> sb.match(m -> m.field("content_sr").query(token).boost(0.5f)));
@@ -74,7 +78,7 @@ public class SearchServiceImpl implements SearchService {
                 // Wildcard Query - unsafe
                 // Matches documents with wildcard matching in "title" field
                 b.should(sb -> sb.wildcard(m -> m.field("name").value("*" + token + "*")));
-
+                b.should(sb -> sb.wildcard(m -> m.field("description").value("*" + token + "*")));
                 // Regexp Query - unsafe
                 // Matches documents with regular expression matching in "title" field
 //                b.should(sb -> sb.regexp(m -> m.field("title").value(".*" + token + ".*")));
@@ -102,6 +106,17 @@ public class SearchServiceImpl implements SearchService {
                     .like(like -> like.text(token))
                     .minTermFreq(1)
                     .minDocFreq(1)));
+
+                b.should(sb -> sb.moreLikeThis(mlt ->
+                        mlt.fields("description")
+                                .like(like -> like.text(token))
+                                .minTermFreq(1)
+                                .minDocFreq(1)));
+
+                b.should(sb -> sb.moreLikeThis(mlt ->
+                        mlt.fields("content_sr").like(
+                                like -> like.text(token)
+                        ).minTermFreq(1)));
             });
             return b;
         })))._toQuery();
