@@ -50,6 +50,15 @@ public class IndexingServiceImpl implements IndexingService {
         idx.setName(facility.getName());
         idx.setServerFilename(serverFilename);
 
+        String lang2 = detectLanguage(facility.getDescription());
+
+        if ("sr".equals(lang2)) {
+            idx.setDescriptionSr(facility.getDescription());
+        }
+        else {
+            idx.setDescriptionEn(facility.getDescription());
+        }
+
 
         // File descriptions
         if ("sr".equalsIgnoreCase(lang)) {

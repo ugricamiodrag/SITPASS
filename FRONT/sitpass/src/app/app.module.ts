@@ -49,6 +49,7 @@ import { CommentComponent } from './comment/comment.component';
 import { CommentFieldComponent } from './comment-field/comment-field.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
 import { NgChartsModule } from 'ng2-charts';
+import { NewSearchComponent } from './new-search/new-search.component';
 
 
 @NgModule({
@@ -80,7 +81,8 @@ import { NgChartsModule } from 'ng2-charts';
     CommentSectionComponent,
     CommentComponent,
     CommentFieldComponent,
-    AnalyticsComponent  // Correctly declared here
+    AnalyticsComponent,
+    NewSearchComponent  // Correctly declared here
   ],
   imports: [
     BrowserModule,

@@ -27,10 +27,9 @@
         "id": "Any-Latin; NFD; [:Nonspacing Mark:] Remove; NFC"
       },
       "serbian_stemmer": {
-        "type": "snowball",
-        "language": "Serbian"
+        "type": "stemmer",
+        "name": "serbian"
       },
-
       "autocomplete_filter": {
         "type": "edge_ngram",
         "min_gram": 2,

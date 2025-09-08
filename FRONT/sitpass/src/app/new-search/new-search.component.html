@@ -1,0 +1,70 @@
+<div class="search-container">
+  <!-- SIMPLE SEARCH -->
+  <h2>Simple Search</h2>
+  <div class="simple-search">
+    <!-- Keywords -->
+    <input
+      type="text"
+      [(ngModel)]="simpleQuery"
+      placeholder="Enter keywords..."
+      class="search-input"
+    />
+
+    <!-- Range filters -->
+    <div class="range-filters">
+      <label *ngFor="let field of numericFields">
+        {{ field.label }} (min):
+        <input type="number" [(ngModel)]="simpleRanges[field.name].min" />
+      </label>
+      <label *ngFor="let field of numericFields">
+        {{ field.label }} (max):
+        <input type="number" [(ngModel)]="simpleRanges[field.name].max" />
+      </label>
+    </div>
+
+    <button (click)="onSimpleSearch()" class="btn-search">Search</button>
+  </div>
+
+  <!-- ADVANCED SEARCH -->
+  <h2>Advanced Search</h2>
+  <div class="advanced-search">
+    <textarea
+      [(ngModel)]="advancedQuery"
+      placeholder='Example: name:"hotel" AND description:"spa" OR content_sr~'
+      rows="3"
+      class="search-textarea"
+    ></textarea>
+
+    <!-- Range filters -->
+    <div class="range-filters">
+      <label *ngFor="let field of numericFields">
+        {{ field.label }} (min):
+        <input type="number" [(ngModel)]="advRanges[field.name].min" />
+      </label>
+      <label *ngFor="let field of numericFields">
+        {{ field.label }} (max):
+        <input type="number" [(ngModel)]="advRanges[field.name].max" />
+      </label>
+    </div>
+
+    <button (click)="onAdvancedSearch()" class="btn-search">Advanced Search</button>
+  </div>
+
+  <!-- RESULTS -->
+  <h2>Results</h2>
+  <div *ngIf="results.length > 0; else noResults">
+    <div *ngFor="let item of results" class="search-result">
+      <h3>{{ item.name }}</h3>
+      <p>{{ item.descriptionEn || item.descriptionSr }}</p>
+      <p><strong>Reviews:</strong> {{ item.reviewCount }}</p>
+      <p><strong>Avg Equipment Grade:</strong> {{ item.avgEquipmentGrade }}</p>
+      <p><strong>Avg Staff Grade:</strong> {{ item.avgStaffGrade }}</p>
+      <p><strong>Avg Hygiene Grade:</strong> {{ item.avgHygieneGrade }}</p>
+      <p><strong>Avg Space Grade:</strong> {{ item.avgSpaceGrade }}</p>
+    </div>
+  </div>
+
+  <ng-template #noResults>
+    <p>No results found.</p>
+  </ng-template>
+</div>

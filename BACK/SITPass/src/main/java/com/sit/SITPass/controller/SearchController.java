@@ -23,12 +23,12 @@ public class SearchController {
     public Page<FacilityIndex> simpleSearch(
                                             @RequestBody SearchQueryDTO simpleSearchQuery,
                                             Pageable pageable) {
-        return searchService.simpleSearch(simpleSearchQuery.keywords(), pageable);
+        return searchService.simpleSearch(simpleSearchQuery.keywords(), simpleSearchQuery.ranges(), pageable);
     }
 
     @PostMapping("/advanced")
     public Page<FacilityIndex> advancedSearch(@RequestBody SearchQueryDTO advancedSearchQuery,
                                            Pageable pageable) {
-        return searchService.advancedSearch(advancedSearchQuery.keywords(), pageable);
+        return searchService.advancedSearch(advancedSearchQuery.keywords(), advancedSearchQuery.ranges() ,pageable);
     }
 }

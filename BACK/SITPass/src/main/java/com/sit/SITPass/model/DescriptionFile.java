@@ -1,5 +1,6 @@
 package com.sit.SITPass.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,13 +14,17 @@ public class DescriptionFile {
     @Id
     private String serverFileName;
 
-    @OneToOne(mappedBy = "descriptionFile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
 
 
-    @OneToOne(mappedBy = "descriptionFile", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "facility_id")
     private Facility facility;
+
 
 
 
