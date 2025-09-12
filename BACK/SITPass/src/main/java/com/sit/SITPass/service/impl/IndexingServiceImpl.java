@@ -7,12 +7,13 @@ import com.sit.SITPass.repository.FacilityRepository;
 import com.sit.SITPass.service.FileService;
 import com.sit.SITPass.service.IndexingService;
 import lombok.RequiredArgsConstructor;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.language.detect.LanguageDetector;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.apache.pdfbox.pdmodel.PDDocument;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -31,75 +32,95 @@ public class IndexingServiceImpl implements IndexingService {
         Facility facility = facilityRepo.findById(facilityId)
                 .orElseThrow(() -> new IllegalArgumentException("Facility not found: " + facilityId));
 
-        // 2) Store file
-        String serverFilename = fileService.store(documentFile, UUID.randomUUID().toString());
-
-        // 3) Extract file text
-
+        String serverFilename = null;
         String content = null;
-        try {
+        String lang = null;
+
+        // 1) Store file
+        if (documentFile != null && !documentFile.isEmpty()) {
+            // Store file
+            serverFilename = fileService.store(documentFile, UUID.randomUUID().toString());
+
+            // Extract content
             content = extractDocumentContent(documentFile);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        String lang = detectLanguage(content);
-
-        // 4) Build ES index entry
-        FacilityIndex idx = new FacilityIndex();
-        idx.setId(UUID.randomUUID().toString());
-        idx.setName(facility.getName());
-        idx.setServerFilename(serverFilename);
-
-        String lang2 = detectLanguage(facility.getDescription());
-
-        if ("sr".equals(lang2)) {
-            idx.setDescriptionSr(facility.getDescription());
-        }
-        else {
-            idx.setDescriptionEn(facility.getDescription());
+            lang = detectLanguage(content);
         }
 
 
-        // File descriptions
-        if ("sr".equalsIgnoreCase(lang)) {
-            idx.setFileDescriptionSr(content);
+
+
+        String descLang = detectLanguage(facility.getDescription());
+
+
+        // 3) Build ES index entry
+        FacilityIndex idx = buildFacilityIndex(facility);
+
+
+        if (content != null) {
+            if ("SR".equalsIgnoreCase(lang)) {
+                idx.setFileDescriptionSr(content);
+            } else {
+                idx.setFileDescriptionEn(content);
+            }
+            idx.setServerFilename(serverFilename);
+        }
+
+        if ("SR".equalsIgnoreCase(descLang)) {
+            idx.setDescriptionSr(content);
         } else {
-            idx.setFileDescriptionEn(content);
+            idx.setDescriptionEn(content);
         }
 
-        //TODO Facility grades
-//        idx.setReviewCount(facility.getReviewCount());
-//        idx.setAvgEquipmentGrade(facility.getAvgEquipmentGrade());
-//        idx.setAvgStaffGrade(facility.getAvgStaffGrade());
-//        idx.setAvgHygieneGrade(facility.getAvgHygieneGrade());
-//        idx.setAvgSpaceGrade(facility.getAvgSpaceGrade());
 
-        // 5) Save to Elasticsearch
+        // 4) Save/update in Elasticsearch
         indexRepo.save(idx);
 
         return serverFilename;
     }
 
-    private String extractDocumentContent(MultipartFile multipartPdfFile) throws Exception {
-        String documentContent;
-        try (var pdfFile = multipartPdfFile.getInputStream()) {
-            var pdDocument = PDDocument.load(pdfFile);
-            var textStripper = new PDFTextStripper();
-            documentContent = textStripper.getText(pdDocument);
-            pdDocument.close();
-        } catch (IOException e) {
-            throw new Exception("Error while trying to load PDF file content.");
+
+
+    private FacilityIndex buildFacilityIndex(Facility facility) {
+        FacilityIndex idx = new FacilityIndex();
+
+        // Use DB ID as ES document ID
+        idx.setId(facility.getId().toString());
+        idx.setName(facility.getName());
+
+        String lang = detectLanguage(facility.getDescription());
+        if ("SR".equalsIgnoreCase(lang)) {
+            idx.setDescriptionSr(facility.getDescription());
+        } else {
+            idx.setDescriptionEn(facility.getDescription());
         }
 
-        return documentContent;
+        // Ratings & review count
+//        idx.setAvgEquipmentGrade(facility.getAvgEquipmentGrade());
+//        idx.setAvgStaffGrade(facility.getAvgStaffGrade());
+//        idx.setAvgHygieneGrade(facility.getAvgHygieneGrade());
+//        idx.setAvgSpaceGrade(facility.getAvgSpaceGrade());
+//        idx.setReviewCount(facility.getReviewCount());
+
+        return idx;
+    }
+
+    private String extractDocumentContent(MultipartFile multipartPdfFile) {
+        try (var pdfFile = multipartPdfFile.getInputStream()) {
+            PDDocument pdDocument = PDDocument.load(pdfFile);
+            PDFTextStripper textStripper = new PDFTextStripper();
+            String content = textStripper.getText(pdDocument);
+            pdDocument.close();
+            return content;
+        } catch (IOException e) {
+            throw new RuntimeException("Error while trying to load PDF file content.", e);
+        }
     }
 
     private String detectLanguage(String text) {
         var detectedLanguage = languageDetector.detect(text).getLanguage().toUpperCase();
-        if (detectedLanguage.equals("HR")) {
+        if ("HR".equals(detectedLanguage)) {
             detectedLanguage = "SR";
         }
-
         return detectedLanguage;
     }
 }

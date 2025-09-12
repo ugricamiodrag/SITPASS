@@ -19,6 +19,7 @@ public class Manages {
     @JsonBackReference(value = "user-reference")
     private User user;
 
+
     @Column(name = "startDate", nullable = false)
     private LocalDate startDate;
 

@@ -6,6 +6,7 @@ import com.sit.SITPass.service.IndexingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/index")
@@ -16,9 +17,13 @@ public class IndexController {
 
     @PostMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public FacilityDocumentFileResponse addDocumentFile(@PathVariable Long id,
+    public FacilityDocumentFileResponse addDocumentFile(
+            @PathVariable Long id,
             @ModelAttribute FacilityDocumentFileDTO documentFile) {
-        var serverFilename = indexingService.indexDocument(id, documentFile.file());
+
+        MultipartFile file = documentFile != null ? documentFile.file() : null;
+        String serverFilename = indexingService.indexDocument(id, file);
         return new FacilityDocumentFileResponse(serverFilename);
     }
+
 }

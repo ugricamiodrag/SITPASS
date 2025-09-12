@@ -81,7 +81,7 @@ public class WebSecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/logOut", "/api/facilities", "/api/images/**", "/api/users/email", "/api/comments/**", "/api/comments/user/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/register", "/api/facilities/search", "/api/comments").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/register", "/api/facilities/search", "/api/comments", "/api/search/simple", "/api/search/advanced", "/api/index/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/manages/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/users/change-password").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN", "ROLE_MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/requests", "/api/reviews/**").permitAll()
@@ -96,7 +96,7 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web
                 .ignoring()
-                .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/comments", "/api/users/email", "/api/facilities/unvisited", "/api/analytics/reviews", "api/analytics/custom", "/api/analytics/users")
+                .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/comments", "/api/users/email", "/api/facilities/unvisited", "/api/analytics/reviews", "api/analytics/custom", "/api/analytics/users", "/api/search/simple", "api/search/advanced", "api/index/**")
                 .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/logOut", "/api/facilities", "/api/reviews/**", "/api/manages/**", "/api/comments/**", "/api/comments/user/**", "/api/facilities/popular", "/api/facilities/visited", "/api/facilities/managed")
                 .requestMatchers(HttpMethod.PUT, "/api/reviews/**")
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico", "/**/*.html", "/**/*.css", "/**/*.js");

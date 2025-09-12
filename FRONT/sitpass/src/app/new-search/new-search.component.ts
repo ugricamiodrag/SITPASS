@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import {ConfigService} from "../services/config.service";
+import {FacilityIndex} from "../models/facility-index.model";
+
 
 @Component({
   selector: 'app-new-search',
@@ -36,9 +39,9 @@ export class NewSearchComponent {
   ];
 
   // RESULTS
-  results: any[] = [];
+  results: FacilityIndex[] = [];
 //
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,  private config: ConfigService) {}
 
   // SIMPLE SEARCH
   onSimpleSearch() {
@@ -53,10 +56,11 @@ export class NewSearchComponent {
 
     const payload = {
       keywords: this.simpleQuery.split(' ').filter((k) => k.trim() !== ''),
+      expression: [],
       ranges,
     };
 
-    this.http.post<any[]>('/api/search/simple', payload).subscribe((res) => {
+    this.http.post<any[]>(this.config.simple_search_url, payload).subscribe((res) => {
       this.results = res;
     });
   }
@@ -77,7 +81,7 @@ export class NewSearchComponent {
       ranges,
     };
 
-    this.http.post<any[]>('/api/search/advanced', payload).subscribe((res) => {
+    this.http.post<any[]>(this.config.advanced_search_url, payload).subscribe((res) => {
       this.results = res;
     });
   }

@@ -30,10 +30,11 @@ public class WorkDay {
     @Column(name = "untilDate")
     private LocalTime until;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonBackReference
-    @JoinColumn(name = "facility_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "facility_id")
+    @JsonBackReference(value = "facility-workday")
     private Facility facility;
+
 
     public WorkDay() {
     }

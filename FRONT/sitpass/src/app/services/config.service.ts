@@ -7,8 +7,28 @@ export class ConfigService {
 
   private _api_url = 'http://localhost:8080/api';
   private _user_url = this._api_url + '/users';
-
+  private _search_url = this._api_url + '/search';
   private _login_url = this._user_url + '/login';
+  private _index_url = this._api_url + '/index';
+
+  getIndexUrl(id: any): string {
+    return this._index_url + "/" + id;
+  }
+
+  get searchUrl(): string {
+    return this._search_url;
+  }
+
+  private _simple_search_url = this.searchUrl + "/simple"
+  private _advanced_search_url = this.searchUrl + "/advanced";
+
+  get simple_search_url(): string {
+    return this._simple_search_url;
+  }
+
+  get advanced_search_url(): string {
+    return this._advanced_search_url;
+  }
 
   get users_url(): string {
     return this._user_url;

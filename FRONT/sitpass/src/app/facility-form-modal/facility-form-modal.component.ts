@@ -7,6 +7,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ImageService } from '../services/image.service';
 import {photoCountValidator} from "../validators/photoCount.validator";
 import {uniqueWeekDaysValidator} from "../validators/uniqueWeekDaysValidator";
+import {HttpClient} from "@angular/common/http";
+import {ConfigService} from "../services/config.service";
 
 @Component({
   selector: 'app-facility-form-modal',
@@ -20,6 +22,7 @@ export class FacilityFormModalComponent {
   newPhotos: File[] = [];
   photosToRemove: string[] = [];
   isAdmin: boolean;
+  documentFile: File | null = null;
 
   constructor(
     public dialogRef: MatDialogRef<FacilityFormModalComponent>,
@@ -28,7 +31,9 @@ export class FacilityFormModalComponent {
     private facilityService: FacilityService,
     private cdr: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private http: HttpClient,
+    private config: ConfigService
   ) {
     this.isAdmin = data.isAdmin;
     const facility = data.facility || {} as Facility;
@@ -186,17 +191,51 @@ export class FacilityFormModalComponent {
     if (this.data.facility && this.data.facility.id) {
       this.facilityService.updateFacility(this.data.facility.id, formData).subscribe(response => {
         this.dialogRef.close(response);
-
+        this.insertIndexDocument(response);
       });
     } else {
       this.facilityService.createFacility(formData).subscribe(response => {
         this.dialogRef.close(response);
-
+        this.insertIndexDocument(response);
       });
     }
   }
 
+  insertIndexDocument(response: Facility) {
+    if (!this.documentFile) return;
+
+    // ✅ Check MIME type
+    const allowedTypes = ['application/pdf'];
+    if (!allowedTypes.includes(this.documentFile.type)) {
+      console.error('Selected file is not a PDF');
+      alert('Please upload a valid PDF file.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', this.documentFile); // must match DTO field name
+
+    this.http.post(this.config.getIndexUrl(response.id), formData)
+      .subscribe({
+        next: () => console.log('Successful index'),
+        error: err => console.error('Failed to index PDF', err)
+      });
+  }
+
+
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  onDocumentChange(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.documentFile = file;
+    }
+  }
+
+// Remove the file
+  removeDocument() {
+    this.documentFile = null;
   }
 }

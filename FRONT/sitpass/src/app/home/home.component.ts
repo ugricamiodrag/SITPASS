@@ -5,6 +5,8 @@ import {FacilitySearchCriteria} from "../models/facility-search.model";
 import {Facility} from "../models/facility.model";
 import {FacilityService} from "../services/facility.service";
 
+import {ConfigService} from "../services/config.service";
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -20,8 +22,9 @@ export class HomeComponent implements OnInit {
   size: number = 5;
   totalPages: number = 0;
   showNoFacilitiesMessage = false;
+  mySet: Set<any> = new Set();
 
-  constructor(private router: Router, private facilityService: FacilityService) { }
+  constructor(private router: Router, private facilityService: FacilityService, private config: ConfigService) { }
 
   ngOnInit() {
     this.checkRole();
@@ -29,6 +32,7 @@ export class HomeComponent implements OnInit {
       this.getPopularFacilities();
       this.getVisitedFacilities();
       this.getUnvisitedFacilities();
+
     }
     else {
       this.loadAdminAndManagerFacilities();
@@ -67,6 +71,8 @@ export class HomeComponent implements OnInit {
     this.showNoFacilitiesMessage = true;
   }
 
+
+
   loadAdminAndManagerFacilities() {
     this.facilityService.getFacilities().subscribe(value => {
       this.searchResults = value;
@@ -77,6 +83,7 @@ export class HomeComponent implements OnInit {
     this.facilityService.getPopularFacilities().subscribe(value => {
       if (value) {
         this.popularFacility = value;
+        this.popularFacility.forEach(item => this.mySet.add(item));
       }
       else {
         this.popularFacility = [];
@@ -88,6 +95,7 @@ export class HomeComponent implements OnInit {
     this.facilityService.getVisitedFacilities().subscribe(value => {
       if (value) {
         this.visitedFacility = value;
+        this.visitedFacility.forEach(item => this.mySet.add(item));
       }
       else {
         this.visitedFacility = [];
@@ -98,6 +106,7 @@ export class HomeComponent implements OnInit {
   getUnvisitedFacilities(): void {
     this.facilityService.getUnvisitedFacilities(this.page, this.size).subscribe(value => {
       this.unvisitedFacility = this.unvisitedFacility.concat(value.content);
+      this.unvisitedFacility.forEach(item => this.mySet.add(item));
       this.totalPages = value.totalPages;
     })
   }

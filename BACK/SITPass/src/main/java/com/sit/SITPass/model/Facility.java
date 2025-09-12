@@ -49,17 +49,19 @@ public class Facility {
     private Set<Discipline> disciplines = new HashSet<>();
 
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference(value = "facility-workday")
     private Set<WorkDay> workDays = new HashSet<>();
+
 
 
     @OneToOne(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference(value = "facility-reference")
     private Manages manages;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "facility-description")
     private Set<DescriptionFile> descriptionFileSet;
+
 
 
 

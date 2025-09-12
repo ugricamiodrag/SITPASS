@@ -75,6 +75,16 @@
     <button mat-button type="button" (click)="addDiscipline()">Add Discipline</button>
   </div>
 
+  <h3>Document</h3>
+  <div class="form-row">
+    <span *ngIf="documentFile">{{ documentFile.name }}</span>
+    <input *ngIf="!documentFile" type="file" (change)="onDocumentChange($event)" accept=".pdf,.doc,.docx">
+    <div *ngIf="documentFile">
+      <button type="button" (click)="removeDocument()">Remove</button>
+    </div>
+  </div>
+
+
   <h3>Photos</h3>
   <div formArrayName="photos">
     <div *ngFor="let photo of photos.controls; let i = index">

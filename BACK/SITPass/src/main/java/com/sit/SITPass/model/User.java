@@ -55,9 +55,14 @@ public class User {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "user-description")
     private Set<DescriptionFile> descriptionFileSet;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "user-reference")
+    private Set<Manages> managesSet = new HashSet<>();
 
 
     public User() {
