@@ -1,6 +1,7 @@
 package com.sit.SITPass.service.impl;
 
 import com.sit.SITPass.DTO.AnalyticsData;
+import com.sit.SITPass.DTO.FacilityAverageRatingDTO;
 import com.sit.SITPass.DTO.ReviewPageDTO;
 import com.sit.SITPass.DTO.TimePeriodData;
 import com.sit.SITPass.model.Facility;
@@ -91,6 +92,16 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public List<AnalyticsData> getAnalyticsData(Long facilityId, LocalDate from, LocalDate to) {
         return reviewRepository.getAnalyticsData(facilityId, from, to);
+    }
+
+    @Override
+    public int getCountOfReviewsForFacility(Long facility) {
+        return reviewRepository.countByFacilityId(facility);
+    }
+
+    @Override
+    public FacilityAverageRatingDTO getFacilityAverageRating(Long id) {
+        return reviewRepository.getAverageRatingsByFacility(id);
     }
 
 

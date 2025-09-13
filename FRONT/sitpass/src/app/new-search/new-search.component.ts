@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {ConfigService} from "../services/config.service";
 import {FacilityIndex} from "../models/facility-index.model";
 
@@ -50,18 +50,25 @@ export class NewSearchComponent {
       const min = this.simpleRanges[key].min;
       const max = this.simpleRanges[key].max;
       if (min != null || max != null) {
-        ranges[key] = `${min ?? '*'}..${max ?? '*'}`;
+        ranges[key] = { min: min ?? null, max: max ?? null }; // <-- send object, not string
       }
     }
 
     const payload = {
-      keywords: this.simpleQuery.split(' ').filter((k) => k.trim() !== ''),
+      keywords: this.simpleQuery.split(' ').filter(k => k.trim() !== ''),
       expression: [],
-      ranges,
+      ranges
     };
 
-    this.http.post<any[]>(this.config.simple_search_url, payload).subscribe((res) => {
-      this.results = res;
+    this.http.post<any>(this.config.simple_search_url, payload, {
+      headers: { 'Content-Type': 'application/json' }
+    }).subscribe({
+      next: (res) => {
+        console.log("✅ Response from backend:", res);
+        this.results = res.content;
+      },
+      error: (err) => console.error("❌ Error occurred:", err),
+      complete: () => console.log("Request completed")
     });
   }
 

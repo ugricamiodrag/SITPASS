@@ -10,10 +10,19 @@ export class ConfigService {
   private _search_url = this._api_url + '/search';
   private _login_url = this._user_url + '/login';
   private _index_url = this._api_url + '/index';
+  private _file_url = this._api_url + '/file';
+
+  getFileGetter(nm: string): string {
+    return this._file_url + '/' + nm;
+  }
+
+
 
   getIndexUrl(id: any): string {
     return this._index_url + "/" + id;
   }
+
+
 
   get searchUrl(): string {
     return this._search_url;

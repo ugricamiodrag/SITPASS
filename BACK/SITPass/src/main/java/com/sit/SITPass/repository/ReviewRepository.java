@@ -1,6 +1,7 @@
 package com.sit.SITPass.repository;
 
 import com.sit.SITPass.DTO.AnalyticsData;
+import com.sit.SITPass.DTO.FacilityAverageRatingDTO;
 import com.sit.SITPass.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,21 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<AnalyticsData> getAnalyticsData(@Param("facilityId") Long facilityId,
                                          @Param("fromDate") LocalDate from,
                                          @Param("toDate") LocalDate to);
+
+    int countByFacilityId(Long facilityId);
+
+    @Query("""
+        SELECT new com.sit.SITPass.DTO.FacilityAverageRatingDTO(
+            r.facility.id,
+            AVG(rt.equipment),
+            AVG(rt.hygene),
+            AVG(rt.space),
+            AVG(rt.staff)
+        )
+        FROM Review r
+        JOIN Rate rt ON r.rate.id = rt.id
+        WHERE r.facility.id = :facilityId
+        GROUP BY r.facility.id
+    """)
+    FacilityAverageRatingDTO getAverageRatingsByFacility(@Param("facilityId") Long facilityId);
 }

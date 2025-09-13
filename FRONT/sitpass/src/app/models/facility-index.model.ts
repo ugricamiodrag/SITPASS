@@ -12,3 +12,15 @@ export interface FacilityIndex {
   avgHygieneGrade: number;
   avgSpaceGrade: number;
 }
+
+interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface FacilityDocumentFileResponse {
+  serverFilename: string;
+}

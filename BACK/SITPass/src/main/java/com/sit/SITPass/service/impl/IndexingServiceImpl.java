@@ -1,15 +1,18 @@
 package com.sit.SITPass.service.impl;
 
+import com.sit.SITPass.DTO.FacilityAverageRatingDTO;
 import com.sit.SITPass.index.FacilityIndex;
 import com.sit.SITPass.indexRepository.FacilityIndexRepository;
 import com.sit.SITPass.model.Facility;
 import com.sit.SITPass.repository.FacilityRepository;
 import com.sit.SITPass.service.FileService;
 import com.sit.SITPass.service.IndexingService;
+import com.sit.SITPass.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.language.detect.LanguageDetector;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +28,7 @@ public class IndexingServiceImpl implements IndexingService {
     private final FacilityRepository facilityRepo;
     private final FileService fileService;
     private final LanguageDetector languageDetector;
+    private final ReviewService reviewService;
 
     @Override
     @Transactional
@@ -49,8 +53,6 @@ public class IndexingServiceImpl implements IndexingService {
 
 
 
-        String descLang = detectLanguage(facility.getDescription());
-
 
         // 3) Build ES index entry
         FacilityIndex idx = buildFacilityIndex(facility);
@@ -65,11 +67,7 @@ public class IndexingServiceImpl implements IndexingService {
             idx.setServerFilename(serverFilename);
         }
 
-        if ("SR".equalsIgnoreCase(descLang)) {
-            idx.setDescriptionSr(content);
-        } else {
-            idx.setDescriptionEn(content);
-        }
+
 
 
         // 4) Save/update in Elasticsearch
@@ -95,14 +93,25 @@ public class IndexingServiceImpl implements IndexingService {
         }
 
         // Ratings & review count
-//        idx.setAvgEquipmentGrade(facility.getAvgEquipmentGrade());
-//        idx.setAvgStaffGrade(facility.getAvgStaffGrade());
-//        idx.setAvgHygieneGrade(facility.getAvgHygieneGrade());
-//        idx.setAvgSpaceGrade(facility.getAvgSpaceGrade());
-//        idx.setReviewCount(facility.getReviewCount());
+        idx.setReviewCount(reviewService.getCountOfReviewsForFacility(facility.getId()));
+
+        FacilityAverageRatingDTO dto = reviewService.getFacilityAverageRating(facility.getId());
+        if (dto != null) { // <-- null check
+            idx.setAvgEquipmentGrade(dto.getAvgEquipment());
+            idx.setAvgStaffGrade(dto.getAvgStaff());
+            idx.setAvgHygieneGrade(dto.getAvgHygene());
+            idx.setAvgSpaceGrade(dto.getAvgSpace());
+        } else {
+            // optionally set default values
+            idx.setAvgEquipmentGrade(0.0);
+            idx.setAvgStaffGrade(0.0);
+            idx.setAvgHygieneGrade(0.0);
+            idx.setAvgSpaceGrade(0.0);
+        }
 
         return idx;
     }
+
 
     private String extractDocumentContent(MultipartFile multipartPdfFile) {
         try (var pdfFile = multipartPdfFile.getInputStream()) {

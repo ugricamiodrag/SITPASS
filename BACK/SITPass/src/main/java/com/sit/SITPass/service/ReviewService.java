@@ -1,6 +1,7 @@
 package com.sit.SITPass.service;
 
 import com.sit.SITPass.DTO.AnalyticsData;
+import com.sit.SITPass.DTO.FacilityAverageRatingDTO;
 import com.sit.SITPass.DTO.ReviewPageDTO;
 import com.sit.SITPass.DTO.TimePeriodData;
 import com.sit.SITPass.model.Review;
@@ -20,5 +21,6 @@ public interface ReviewService {
     void deleteReview(Long id);
     List<Review> getActiveReviews(Long id);
     List<AnalyticsData> getAnalyticsData(Long facilityId, LocalDate from, LocalDate to);
-
+    int getCountOfReviewsForFacility(Long facility);
+    FacilityAverageRatingDTO getFacilityAverageRating(Long id);
 }

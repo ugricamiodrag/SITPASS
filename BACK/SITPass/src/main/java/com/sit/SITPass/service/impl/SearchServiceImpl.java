@@ -8,10 +8,12 @@ import com.sit.SITPass.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.client.elc.NativeQueryBuilder;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -70,45 +72,61 @@ public class SearchServiceImpl implements SearchService {
     private Query buildSimpleSearchQuery(List<String> tokens, Map<String, RangeDTO> ranges) {
         System.out.println("Building simple search query for tokens: " + tokens + " with ranges: " + ranges);
 
-        return BoolQuery.of(b -> {
+        return BoolQuery.of(q -> q.must(mb -> mb.bool(b -> {
             tokens.forEach(token -> {
-                b.should(s -> s.match(m -> m.field("name").query(token)));
-                b.should(s -> s.match(m -> m.field("descriptionSr").query(token)));
-                b.should(s -> s.match(m -> m.field("descriptionEn").query(token)));
-            });
-            return b;
-        })._toQuery();
 
-//        return Query.of(q ->
-//                q.bool(b -> {
-//                    for (String token : tokens) {
-//                        if (token == null || token.trim().isEmpty()) continue;
-//                        token = token.trim();
-//
-//                        // osnovni match
-//                        String finalToken = token;
-//                        b.should(s -> s.match(m -> m.field("name").query(finalToken).fuzziness(Fuzziness.ONE.asString())));
-//                        b.should(s -> s.match(m -> m.field("descriptionSr").query(finalToken)));
-//                        b.should(s -> s.match(m -> m.field("descriptionEn").query(finalToken)));
-//                        b.should(s -> s.match(m -> m.field("fileDescriptionSr").query(finalToken)));
-//                        b.should(s -> s.match(m -> m.field("fileDescriptionEn").query(finalToken)));
-//
-//                        // phrase match
-//                        b.should(s -> s.matchPhrase(mp -> mp.field("name").query(finalToken)));
-//
-//                        // prefix – samo ako token ima neku dužinu
-//                        if (token.length() > 2) {
-//                            b.should(s -> s.prefix(p -> p.field("name").value(finalToken)));
-//                            b.should(s -> s.prefix(p -> p.field("descriptionSr").value(finalToken)));
-//                            b.should(s -> s.prefix(p -> p.field("descriptionEn").value(finalToken)));
-//                            b.should(s -> s.prefix(p -> p.field("fileDescriptionSr").value(finalToken)));
-//                            b.should(s -> s.prefix(p -> p.field("fileDescriptionEn").value(finalToken)));
-//                        }
-//
-//                        // fuzzy – samo ako token ima neku dužinu
-//                        if (token.length() > 2) {
-//                            b.should(s -> s.fuzzy(f -> f.field("name").value(finalToken).fuzziness("1")));
-//                        }
+
+                if (token.startsWith("\"") && token.endsWith("\"")) {
+                    String phrase = token.substring(1, token.length() - 1);
+                    b.should(sb -> sb.matchPhrase(m -> m.field("name").query(phrase)));
+                    b.should(sb -> sb.matchPhrase(m -> m.field("description_sr").query(phrase)));
+                    b.should(sb -> sb.matchPhrase(m -> m.field("description_en").query(phrase)));
+                    b.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_sr").query(phrase)));
+                    b.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_en").query(phrase)));
+                }
+
+                else if (token.endsWith("*")) {
+                    String prefix = token.substring(0, token.length() - 1);
+                    b.should(sb -> sb.prefix(p -> p.field("name").value(prefix)));
+                    b.should(sb -> sb.prefix(p -> p.field("description_sr").value(prefix)));
+                    b.should(sb -> sb.prefix(p -> p.field("description_en").value(prefix)));
+                    b.should(sb -> sb.prefix(p -> p.field("fileDescription_sr").value(prefix)));
+                    b.should(sb -> sb.prefix(p -> p.field("fileDescription_en").value(prefix)));
+                }
+
+                else if (token.startsWith("~")) {
+                    String fuzzyValue = token.substring(1);
+                    b.should(sb -> sb.fuzzy(f -> f.field("name").value(fuzzyValue).fuzziness("1")));
+                    b.should(sb -> sb.fuzzy(f -> f.field("description_sr").value(fuzzyValue).fuzziness("1")));
+                    b.should(sb -> sb.fuzzy(f -> f.field("description_en").value(fuzzyValue).fuzziness("1")));
+                    b.should(sb -> sb.fuzzy(f -> f.field("fileDescription_sr").value(fuzzyValue).fuzziness("1")));
+                    b.should(sb -> sb.fuzzy(f -> f.field("fileDescription_en").value(fuzzyValue).fuzziness("1")));
+                }
+                // Default -> Match + MatchPhrase
+                else {
+                    b.should(sb -> sb.match(m -> m.field("name").fuzziness("1").query(token)));
+                    b.should(sb -> sb.match(m -> m.field("description_sr").query(token)));
+                    b.should(sb -> sb.match(m -> m.field("description_en").query(token)));
+                    b.should(sb -> sb.match(m -> m.field("fileDescription_sr").query(token)));
+                    b.should(sb -> sb.match(m -> m.field("fileDescription_en").query(token)));
+                    b.should(sb -> sb.matchPhrase(m -> m.field("name").query(token)));
+                }
+            });
+
+
+            ranges.forEach((field, range) -> {
+                b.filter(fb -> fb.range(r -> {
+                    r.field(field);
+                    if (range.min() != null) r.gte(JsonData.of(range.min()));
+                    if (range.max() != null) r.lte(JsonData.of(range.max()));
+                    return r;
+                }));
+            });
+
+            return b;
+        })))._toQuery();
+
+
 //
 //                        // moreLikeThis – obično ignoriši ako je prekratak token
 //                        if (token.length() > 3) {
@@ -193,6 +211,13 @@ public class SearchServiceImpl implements SearchService {
                 IndexCoordinates.of("facility_index"));
         var searchHitsPaged = SearchHitSupport.searchPageFor(searchHits, searchQuery.getPageable());
         System.out.println("Query returned " + searchHits.get().toList().size() + " hits");
-        return (Page<FacilityIndex>) SearchHitSupport.unwrapSearchHits(searchHitsPaged);
+
+        // Map SearchHit<FacilityIndex> to FacilityIndex and create a new PageImpl
+        List<FacilityIndex> content = searchHitsPaged.getContent().stream()
+                .map(SearchHit::getContent)
+                .toList();
+
+        return new PageImpl<>(content, searchHitsPaged.getPageable(), searchHitsPaged.getTotalElements());
     }
+
 }

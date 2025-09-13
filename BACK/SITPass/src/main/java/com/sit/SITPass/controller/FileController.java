@@ -15,6 +15,7 @@ import java.nio.file.Path;
 
 @RestController
 @RequestMapping("api/file")
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 @RequiredArgsConstructor
 public class FileController {
 
@@ -32,4 +33,11 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(Path.of(filename)))
                 .body(new InputStreamResource(minioResponse));
     }
+
+    @DeleteMapping("/{filename}")
+    public ResponseEntity<Void> deleteFile(@PathVariable String filename) {
+        fileService.delete(filename);
+        return ResponseEntity.noContent().build();
+    }
+
 }

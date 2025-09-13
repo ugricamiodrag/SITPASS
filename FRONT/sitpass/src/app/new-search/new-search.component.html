@@ -12,14 +12,16 @@
 
     <!-- Range filters -->
     <div class="range-filters">
-      <label *ngFor="let field of numericFields">
-        {{ field.label }} (min):
-        <input type="number" [(ngModel)]="simpleRanges[field.name].min" />
-      </label>
-      <label *ngFor="let field of numericFields">
-        {{ field.label }} (max):
-        <input type="number" [(ngModel)]="simpleRanges[field.name].max" />
-      </label>
+      <div *ngFor="let field of numericFields" class="range-field">
+        <label>
+          {{ field.label }} (min):
+          <input type="number" [(ngModel)]="simpleRanges[field.name].min" />
+        </label>
+        <label>
+          {{ field.label }} (max):
+          <input type="number" [(ngModel)]="simpleRanges[field.name].max" />
+        </label>
+      </div>
     </div>
 
     <button (click)="onSimpleSearch()" class="btn-search">Search</button>
@@ -37,14 +39,16 @@
 
     <!-- Range filters -->
     <div class="range-filters">
-      <label *ngFor="let field of numericFields">
-        {{ field.label }} (min):
-        <input type="number" [(ngModel)]="advRanges[field.name].min" />
-      </label>
-      <label *ngFor="let field of numericFields">
-        {{ field.label }} (max):
-        <input type="number" [(ngModel)]="advRanges[field.name].max" />
-      </label>
+      <div *ngFor="let field of numericFields" class="range-field">
+        <label>
+          {{ field.label }} (min):
+          <input type="number" [(ngModel)]="advRanges[field.name].min" />
+        </label>
+        <label>
+          {{ field.label }} (max):
+          <input type="number" [(ngModel)]="advRanges[field.name].max" />
+        </label>
+      </div>
     </div>
 
     <button (click)="onAdvancedSearch()" class="btn-search">Advanced Search</button>
