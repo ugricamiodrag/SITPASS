@@ -81,7 +81,7 @@ public class WebSecurityConfig {
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/logOut", "/api/facilities", "/api/images/**", "/api/users/email", "/api/comments/**", "/api/index/**","/api/comments/user/**", "/api/file/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/register", "/api/facilities/search", "/api/comments", "/api/search/simple", "/api/search/advanced", "/api/index/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users/register", "/api/facilities/search", "/api/comments", "/api/search/simple", "/api/search/advance", "/api/index/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/file/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/manages/**").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.OPTIONS, "/api/file/**").permitAll()
@@ -99,7 +99,7 @@ public class WebSecurityConfig {
         return web -> web
                 .ignoring()
                 .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/comments", "/api/users/email", "/api/facilities/unvisited", "/api/analytics/reviews",
-                        "api/analytics/custom", "/api/analytics/users", "/api/search/simple", "/api/search/advanced", "/api/index/**")
+                        "api/analytics/custom", "/api/analytics/users", "/api/search/simple", "/api/search/advance", "/api/index/**")
                 .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/logOut", "/api/facilities", "/api/reviews/**",
                         "/api/manages/**", "/api/comments/**", "/api/comments/user/**", "/api/facilities/popular", "/api/facilities/visited", "/api/facilities/managed", "/api/index/**", "/api/file/**")
                 .requestMatchers(HttpMethod.PUT, "/api/reviews/**")

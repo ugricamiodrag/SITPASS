@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -132,4 +133,21 @@ public class IndexingServiceImpl implements IndexingService {
         }
         return detectedLanguage;
     }
+
+    @Override
+    public void updateRatingsInFacility(Facility facility) {
+        FacilityAverageRatingDTO dto = reviewService.getFacilityAverageRating(facility.getId());
+        Optional<FacilityIndex> idx = indexRepo.findById(facility.getId().toString());
+        if (dto != null && idx.isPresent()) {
+            FacilityIndex index = idx.get();
+            index.setReviewCount(idx.get().getReviewCount()+1);
+            index.setAvgEquipmentGrade(dto.getAvgEquipment());
+            index.setAvgStaffGrade(dto.getAvgStaff());
+            index.setAvgHygieneGrade(dto.getAvgHygene());
+            index.setAvgSpaceGrade(dto.getAvgSpace());
+            indexRepo.save(index);
+        }
+
+    }
+
 }

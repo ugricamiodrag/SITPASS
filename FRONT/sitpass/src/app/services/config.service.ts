@@ -29,7 +29,7 @@ export class ConfigService {
   }
 
   private _simple_search_url = this.searchUrl + "/simple"
-  private _advanced_search_url = this.searchUrl + "/advanced";
+  private _advanced_search_url = this.searchUrl + "/advance";
 
   get simple_search_url(): string {
     return this._simple_search_url;

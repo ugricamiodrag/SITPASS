@@ -40,6 +40,7 @@ export class NewSearchComponent {
 
   // RESULTS
   results: FacilityIndex[] = [];
+  isAsc: boolean = true;
 //
   constructor(private http: HttpClient,  private config: ConfigService) {}
 
@@ -57,7 +58,8 @@ export class NewSearchComponent {
     const payload = {
       keywords: this.simpleQuery.split(' ').filter(k => k.trim() !== ''),
       expression: [],
-      ranges
+      ranges,
+      isAsc: this.isAsc
     };
 
     this.http.post<any>(this.config.simple_search_url, payload, {
@@ -79,17 +81,37 @@ export class NewSearchComponent {
       const min = this.advRanges[key].min;
       const max = this.advRanges[key].max;
       if (min != null || max != null) {
-        ranges[key] = `${min ?? '*'}..${max ?? '*'}`;
+        ranges[key] = { min, max }; // keep as numbers, not strings
       }
     }
 
+    // Split advancedQuery into exactly 3 elements
+    const parts = this.advancedQuery.match(/(.+?)\s+(AND|OR|NOT)\s+(.+)/i);
+    if (!parts) {
+      console.error("Advanced query must be in format: field:value OPERATOR field:value");
+      return;
+    }
+
+    const expression = [parts[1].trim(), parts[2].toUpperCase(), parts[3].trim()];
+
     const payload = {
-      expression: this.advancedQuery.split(' ').filter((e) => e.trim() !== ''),
+      keywords: [],
+      expression,
       ranges,
+      isAsc: this.isAsc
     };
 
-    this.http.post<any[]>(this.config.advanced_search_url, payload).subscribe((res) => {
-      this.results = res;
+    console.log("Advanced search payload:", payload);
+
+    this.http.post<any>(this.config.advanced_search_url, payload, {
+      headers: { "Content-Type": "application/json" }
+    }).subscribe({
+      next: (res) => this.results = res.content,
+      error: (err) => console.error("Advanced search request failed", err)
     });
   }
+
+
+
+
 }

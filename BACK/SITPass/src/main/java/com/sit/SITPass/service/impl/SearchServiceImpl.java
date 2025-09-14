@@ -2,7 +2,6 @@ package com.sit.SITPass.service.impl;
 
 import co.elastic.clients.json.JsonData;
 import com.sit.SITPass.DTO.RangeDTO;
-import com.sit.SITPass.DTO.SearchQueryDTO;
 import com.sit.SITPass.index.FacilityIndex;
 import com.sit.SITPass.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +20,10 @@ import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +32,7 @@ public class SearchServiceImpl implements SearchService {
     private final ElasticsearchOperations elasticsearchTemplate;
 
     public Page<FacilityIndex> simpleSearch(List<String> keywords,
-                                            Map<String, RangeDTO> ranges,
+                                            Map<String, RangeDTO> ranges,  boolean isAsc,
                                             Pageable pageable) {
         System.out.println("Entering simpleSearch with keywords: " + keywords);
         Query query = buildSimpleSearchQuery(keywords, ranges);
@@ -46,13 +46,13 @@ public class SearchServiceImpl implements SearchService {
                 .build();
         System.out.println("NativeQuery created for simpleSearch");
 
-        Page<FacilityIndex> result = runQuery(searchQuery);
+        Page<FacilityIndex> result = runQuery(searchQuery, isAsc);
         System.out.println("simpleSearch returned " + result.getTotalElements() + " results");
         return result;
     }
 
     public Page<FacilityIndex> advancedSearch(List<String> expression,
-                                              Map<String, RangeDTO> ranges,
+                                              Map<String, RangeDTO> ranges, boolean isAsc,
                                               Pageable pageable) {
         System.out.println("Entering advancedSearch with expression: " + expression);
         Query query = buildAdvancedSearchQuery(expression, ranges);
@@ -64,7 +64,7 @@ public class SearchServiceImpl implements SearchService {
                 .build();
         System.out.println("NativeQuery created for advancedSearch");
 
-        Page<FacilityIndex> result = runQuery(searchQuery);
+        Page<FacilityIndex> result = runQuery(searchQuery, isAsc);
         System.out.println("advancedSearch returned " + result.getTotalElements() + " results");
         return result;
     }
@@ -72,59 +72,57 @@ public class SearchServiceImpl implements SearchService {
     private Query buildSimpleSearchQuery(List<String> tokens, Map<String, RangeDTO> ranges) {
         System.out.println("Building simple search query for tokens: " + tokens + " with ranges: " + ranges);
 
-        return BoolQuery.of(q -> q.must(mb -> mb.bool(b -> {
-            tokens.forEach(token -> {
+        return BoolQuery.of(q -> {
 
+            q.must(mb -> mb.bool(b -> {
 
-                if (token.startsWith("\"") && token.endsWith("\"")) {
-                    String phrase = token.substring(1, token.length() - 1);
-                    b.should(sb -> sb.matchPhrase(m -> m.field("name").query(phrase)));
-                    b.should(sb -> sb.matchPhrase(m -> m.field("description_sr").query(phrase)));
-                    b.should(sb -> sb.matchPhrase(m -> m.field("description_en").query(phrase)));
-                    b.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_sr").query(phrase)));
-                    b.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_en").query(phrase)));
-                }
+                tokens.forEach(token -> {
+                    b.must(inner -> inner.bool(innerBool -> {
+                        if (token.startsWith("\"") && token.endsWith("\"")) {
+                            String phrase = token.substring(1, token.length() - 1);
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("name").query(phrase)));
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("description_sr").query(phrase)));
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("description_en").query(phrase)));
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_sr").query(phrase)));
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("fileDescription_en").query(phrase)));
+                        } else if (token.endsWith("*")) {
+                            String prefix = token.substring(0, token.length() - 1);
+                            innerBool.should(sb -> sb.prefix(p -> p.field("name").value(prefix)));
+                            innerBool.should(sb -> sb.prefix(p -> p.field("description_sr").value(prefix)));
+                            innerBool.should(sb -> sb.prefix(p -> p.field("description_en").value(prefix)));
+                            innerBool.should(sb -> sb.prefix(p -> p.field("fileDescription_sr").value(prefix)));
+                            innerBool.should(sb -> sb.prefix(p -> p.field("fileDescription_en").value(prefix)));
+                        } else if (token.startsWith("~")) {
+                            String fuzzyValue = token.substring(1);
+                            innerBool.should(sb -> sb.fuzzy(f -> f.field("name").value(fuzzyValue).fuzziness("1")));
+                            innerBool.should(sb -> sb.fuzzy(f -> f.field("description_sr").value(fuzzyValue).fuzziness("1")));
+                            innerBool.should(sb -> sb.fuzzy(f -> f.field("description_en").value(fuzzyValue).fuzziness("1")));
+                            innerBool.should(sb -> sb.fuzzy(f -> f.field("fileDescription_sr").value(fuzzyValue).fuzziness("1")));
+                            innerBool.should(sb -> sb.fuzzy(f -> f.field("fileDescription_en").value(fuzzyValue).fuzziness("1")));
+                        } else {
+                            innerBool.should(sb -> sb.match(m -> m.field("name").fuzziness("1").query(token)));
+                            innerBool.should(sb -> sb.match(m -> m.field("description_sr").query(token)));
+                            innerBool.should(sb -> sb.match(m -> m.field("description_en").query(token)));
+                            innerBool.should(sb -> sb.match(m -> m.field("fileDescription_sr").query(token)));
+                            innerBool.should(sb -> sb.match(m -> m.field("fileDescription_en").query(token)));
+                            innerBool.should(sb -> sb.matchPhrase(m -> m.field("name").query(token)));
+                        }
+                        return innerBool;
+                    }));
+                });
 
-                else if (token.endsWith("*")) {
-                    String prefix = token.substring(0, token.length() - 1);
-                    b.should(sb -> sb.prefix(p -> p.field("name").value(prefix)));
-                    b.should(sb -> sb.prefix(p -> p.field("description_sr").value(prefix)));
-                    b.should(sb -> sb.prefix(p -> p.field("description_en").value(prefix)));
-                    b.should(sb -> sb.prefix(p -> p.field("fileDescription_sr").value(prefix)));
-                    b.should(sb -> sb.prefix(p -> p.field("fileDescription_en").value(prefix)));
-                }
-
-                else if (token.startsWith("~")) {
-                    String fuzzyValue = token.substring(1);
-                    b.should(sb -> sb.fuzzy(f -> f.field("name").value(fuzzyValue).fuzziness("1")));
-                    b.should(sb -> sb.fuzzy(f -> f.field("description_sr").value(fuzzyValue).fuzziness("1")));
-                    b.should(sb -> sb.fuzzy(f -> f.field("description_en").value(fuzzyValue).fuzziness("1")));
-                    b.should(sb -> sb.fuzzy(f -> f.field("fileDescription_sr").value(fuzzyValue).fuzziness("1")));
-                    b.should(sb -> sb.fuzzy(f -> f.field("fileDescription_en").value(fuzzyValue).fuzziness("1")));
-                }
-                // Default -> Match + MatchPhrase
-                else {
-                    b.should(sb -> sb.match(m -> m.field("name").fuzziness("1").query(token)));
-                    b.should(sb -> sb.match(m -> m.field("description_sr").query(token)));
-                    b.should(sb -> sb.match(m -> m.field("description_en").query(token)));
-                    b.should(sb -> sb.match(m -> m.field("fileDescription_sr").query(token)));
-                    b.should(sb -> sb.match(m -> m.field("fileDescription_en").query(token)));
-                    b.should(sb -> sb.matchPhrase(m -> m.field("name").query(token)));
-                }
-            });
-
-
-            ranges.forEach((field, range) -> {
-                b.filter(fb -> fb.range(r -> {
+                ranges.forEach((field, range) -> b.filter(fb -> fb.range(r -> {
                     r.field(field);
                     if (range.min() != null) r.gte(JsonData.of(range.min()));
                     if (range.max() != null) r.lte(JsonData.of(range.max()));
                     return r;
-                }));
-            });
+                })));
 
-            return b;
-        })))._toQuery();
+                return b;
+            }));
+
+            return q;
+        })._toQuery();
 
 
 //
@@ -158,42 +156,68 @@ public class SearchServiceImpl implements SearchService {
 
     private Query buildAdvancedSearchQuery(List<String> expression, Map<String, RangeDTO> ranges) {
         System.out.println("Building advanced search query for expression: " + expression + " and ranges: " + ranges);
+
         if (expression.size() != 3) {
             throw new IllegalArgumentException("Expression must contain 3 elements: operand1, operation, operand2");
         }
 
-        String operation = expression.get(1);
+        // Extract operation and operands
+        String operation = expression.get(1).toUpperCase();
         expression.remove(1);
 
         String[] fieldValue1 = expression.get(0).split(":", 2);
-        String field1 = fieldValue1[0];
-        String value1 = fieldValue1[1];
+        String field1 = fieldValue1[0].trim();
+        String value1 = fieldValue1[1].replace("\"", "").trim();
 
         String[] fieldValue2 = expression.get(1).split(":", 2);
-        String field2 = fieldValue2[0];
-        String value2 = fieldValue2[1];
+        String field2 = fieldValue2[0].trim();
+        String value2 = fieldValue2[1].replace("\"", "").trim();
 
-        System.out.println("Advanced search parsed fields: " + field1 + "=" + value1 + ", " + field2 + "=" + value2 + " with operation: " + operation);
+        System.out.printf("Advanced search parsed fields: %s=%s, %s=%s with operation: %s%n",
+                field1, value1, field2, value2, operation);
+
+        // Helper function to build different query types
+        Function<String[], Query> buildQuery = fv -> {
+            String field = fv[0];
+            String value = fv[1];
+
+            return BoolQuery.of(b -> {
+                b.should(q -> q.match(m -> m.field(field).query(value)));               // normal match
+                b.should(q -> q.matchPhrase(p -> p.field(field).query(value)));         // phrase query
+                b.should(q -> q.prefix(p -> p.field(field).value(value.toLowerCase()))); // prefix
+                b.should(q -> q.match(m -> m.field(field).query(value).fuzziness("AUTO"))); // fuzzy
+                return b;
+            })._toQuery();
+        };
+
+        Query leftQuery = buildQuery.apply(new String[]{field1, value1});
+        Query rightQuery = buildQuery.apply(new String[]{field2, value2});
+
+        // Build bool query with logical operator
 
         return BoolQuery.of(b -> {
-            switch (operation.toUpperCase()) {
-                case "AND":
-                    b.must(m -> m.match(mm -> mm.field(field1).query(value1).fuzziness(Fuzziness.ONE.asString())));
-                    b.must(m -> m.match(mm -> mm.field(field2).query(value2)));
-                    break;
-                case "OR":
-                    b.should(s -> s.match(mm -> mm.field(field1).query(value1).fuzziness(Fuzziness.ONE.asString())));
-                    b.should(s -> s.match(mm -> mm.field(field2).query(value2)));
-                    break;
-                case "NOT":
-                    b.must(m -> m.match(mm -> mm.field(field1).query(value1).fuzziness(Fuzziness.ONE.asString())));
-                    b.mustNot(m -> m.match(mm -> mm.field(field2).query(value2)));
-                    break;
+            switch (operation) {
+                case "AND" -> {
+                    b.must(leftQuery);
+                    b.must(rightQuery);
+                }
+                case "OR" -> {
+                    b.should(leftQuery);
+                    b.should(rightQuery);
+                    b.minimumShouldMatch("1");
+                }
+                case "NOT" -> {
+                    b.must(leftQuery);
+                    b.mustNot(rightQuery);
+                }
+                default -> throw new IllegalArgumentException("Unsupported operator: " + operation);
             }
 
+            // Add range filters if present
             for (Map.Entry<String, RangeDTO> entry : ranges.entrySet()) {
                 String field = entry.getKey();
                 RangeDTO range = entry.getValue();
+
                 b.filter(f -> {
                     RangeQuery.Builder rangeQuery = new RangeQuery.Builder().field(field);
                     if (range.min() != null) rangeQuery.gte(JsonData.of(range.min()));
@@ -201,11 +225,13 @@ public class SearchServiceImpl implements SearchService {
                     return f.range(rangeQuery.build());
                 });
             }
+
             return b;
         })._toQuery();
     }
 
-    private Page<FacilityIndex> runQuery(NativeQuery searchQuery) {
+
+    private Page<FacilityIndex> runQuery(NativeQuery searchQuery,  boolean isAsc) {
         System.out.println("Running query: " + searchQuery.getQuery());
         var searchHits = elasticsearchTemplate.search(searchQuery, FacilityIndex.class,
                 IndexCoordinates.of("facility_index"));
@@ -215,7 +241,15 @@ public class SearchServiceImpl implements SearchService {
         // Map SearchHit<FacilityIndex> to FacilityIndex and create a new PageImpl
         List<FacilityIndex> content = searchHitsPaged.getContent().stream()
                 .map(SearchHit::getContent)
-                .toList();
+                .collect(Collectors.toList());
+
+        if (isAsc) {
+            content.sort((o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+        } else {
+            content.sort((o1, o2) -> o2.getName().compareToIgnoreCase(o1.getName()));
+        }
+
+
 
         return new PageImpl<>(content, searchHitsPaged.getPageable(), searchHitsPaged.getTotalElements());
     }

@@ -12,6 +12,8 @@ services:
       - xpack.security.enabled=false
     ports:
       - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data 
     networks:
       - ddmdemo-network
 #    command: >
@@ -47,3 +49,4 @@ networks:
 
 volumes:
   minio-data:
+  es-data:

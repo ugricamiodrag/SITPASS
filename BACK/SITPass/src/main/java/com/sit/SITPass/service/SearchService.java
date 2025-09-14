@@ -12,8 +12,8 @@ import java.util.Map;
 @Service
 public interface SearchService {
     Page<FacilityIndex> simpleSearch(List<String> keywords,
-                                     Map<String, RangeDTO> ranges,
+                                     Map<String, RangeDTO> ranges, boolean isAsc,
                                      Pageable pageable);
 
-    Page<FacilityIndex> advancedSearch(List<String> tokens, Map<String, RangeDTO> ranges, Pageable pageable);
+    Page<FacilityIndex> advancedSearch(List<String> tokens, Map<String, RangeDTO> ranges,  boolean isAsc, Pageable pageable);
 }

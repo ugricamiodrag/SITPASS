@@ -10,6 +10,13 @@
       class="search-input"
     />
 
+
+
+
+<!--    <select [(ngModel)]="ascDescOrder" class="search-input">-->
+<!--      <option [ngValue]="true">Asc</option>-->
+<!--      <option [ngValue]="false">Desc</option>-->
+<!--    </select>-->
     <!-- Range filters -->
     <div class="range-filters">
       <div *ngFor="let field of numericFields" class="range-field">
@@ -26,6 +33,11 @@
 
     <button (click)="onSimpleSearch()" class="btn-search">Search</button>
   </div>
+
+  <select [(ngModel)]="isAsc" class="search-input">
+    <option [ngValue]="true">Asc</option>
+    <option [ngValue]="false">Desc</option>
+  </select>
 
   <!-- ADVANCED SEARCH -->
   <h2>Advanced Search</h2>

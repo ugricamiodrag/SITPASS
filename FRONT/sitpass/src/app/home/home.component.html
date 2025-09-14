@@ -40,12 +40,12 @@
 <!--    </div>-->
 <!--  </div>-->
 
-<!--  <div class="container" *ngIf="visitedFacility.length > 0">-->
-<!--    <h2>Revisit some of the facilities</h2>-->
-<!--    <div *ngFor="let facility of visitedFacility">-->
-<!--      <app-facility-card [facility]="facility"></app-facility-card>-->
-<!--    </div>-->
-<!--  </div>-->
+  <div class="container" *ngIf="visitedFacility.length > 0">
+    <h2>Revisit some of the facilities</h2>
+    <div *ngFor="let facility of visitedFacility">
+      <app-facility-card [facility]="facility"></app-facility-card>
+    </div>
+  </div>
 
   <div class="container" *ngIf="unvisitedFacility.length > 0">
     <h2>... or find new facilities that might pique your interest</h2>

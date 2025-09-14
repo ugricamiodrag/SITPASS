@@ -43,6 +43,9 @@ public class ReviewController {
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    @Autowired
+    private IndexingService indexingService;
+
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_USER')")
     public ResponseEntity<?> review(@RequestBody ReviewDTO reviewDTO) {
@@ -101,6 +104,7 @@ public class ReviewController {
         review.setHidden(false);
 
         reviewService.saveReview(review);
+        indexingService.updateRatingsInFacility(facility);
 
         return ResponseEntity.ok(reviewDTO);
     }
