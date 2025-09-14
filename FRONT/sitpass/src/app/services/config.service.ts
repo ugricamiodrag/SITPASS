@@ -18,6 +18,7 @@ export class ConfigService {
 
 
 
+
   getIndexUrl(id: any): string {
     return this._index_url + "/" + id;
   }
@@ -30,6 +31,12 @@ export class ConfigService {
 
   private _simple_search_url = this.searchUrl + "/simple"
   private _advanced_search_url = this.searchUrl + "/advance";
+  private _mlt_search_url = this.searchUrl + "/mlt";
+
+
+  get mlt_search_url(): string {
+    return this._mlt_search_url;
+  }
 
   get simple_search_url(): string {
     return this._simple_search_url;

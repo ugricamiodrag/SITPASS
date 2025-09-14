@@ -69,6 +69,26 @@ public class SearchServiceImpl implements SearchService {
         return result;
     }
 
+
+    public Page<FacilityIndex> MLTSearch(String expression, boolean isAsc, Pageable pageable) {
+        System.out.println("Entering MLT search with expression: " + expression);
+        Query query = buildMLTQuery(expression);
+        System.out.println("Built MLT search query: " + query);
+
+
+
+        NativeQuery MLTQuery = new NativeQueryBuilder()
+                .withQuery(query)
+                .withPageable(pageable)
+                .build();
+        System.out.println("NativeQuery created for simpleSearch");
+
+        Page<FacilityIndex> result = runQuery(MLTQuery, isAsc);
+        System.out.println("simpleSearch returned " + result.getTotalElements() + " results");
+        return result;
+    }
+
+
     private Query buildSimpleSearchQuery(List<String> tokens, Map<String, RangeDTO> ranges) {
         System.out.println("Building simple search query for tokens: " + tokens + " with ranges: " + ranges);
 
@@ -252,6 +272,21 @@ public class SearchServiceImpl implements SearchService {
 
 
         return new PageImpl<>(content, searchHitsPaged.getPageable(), searchHitsPaged.getTotalElements());
+    }
+
+    private Query buildMLTQuery(String expression) {
+        if (expression == null || expression.isBlank()) {
+            throw new IllegalArgumentException("Expression must not be empty");
+        }
+
+        return BoolQuery.of(b -> b
+                .should(s -> s.moreLikeThis(mlt -> mlt
+                        .fields("name", "description_sr", "description_en", "fileDescription_sr", "fileDescription_en")
+                        .like(l -> l.text(expression))
+                        .minTermFreq(1)
+                        .minDocFreq(1)
+                ))
+        )._toQuery();
     }
 
 }

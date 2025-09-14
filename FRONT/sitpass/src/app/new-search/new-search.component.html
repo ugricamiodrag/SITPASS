@@ -32,8 +32,9 @@
     </div>
 
     <button (click)="onSimpleSearch()" class="btn-search">Search</button>
-  </div>
 
+  </div>
+  <button (click)="andJustLikeThat()" class="btn-search">... Or maybe more like this</button>
   <select [(ngModel)]="isAsc" class="search-input">
     <option [ngValue]="true">Asc</option>
     <option [ngValue]="false">Desc</option>
@@ -77,6 +78,7 @@
       <p><strong>Avg Staff Grade:</strong> {{ item.avgStaffGrade }}</p>
       <p><strong>Avg Hygiene Grade:</strong> {{ item.avgHygieneGrade }}</p>
       <p><strong>Avg Space Grade:</strong> {{ item.avgSpaceGrade }}</p>
+      <button (click)="downloadPDF(item.serverFilename)" class="btn-search">Download PDF</button>
     </div>
   </div>
 

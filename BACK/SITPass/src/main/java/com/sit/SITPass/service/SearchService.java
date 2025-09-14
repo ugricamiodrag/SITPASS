@@ -16,4 +16,5 @@ public interface SearchService {
                                      Pageable pageable);
 
     Page<FacilityIndex> advancedSearch(List<String> tokens, Map<String, RangeDTO> ranges,  boolean isAsc, Pageable pageable);
+    Page<FacilityIndex> MLTSearch(String expression, boolean isAsc, Pageable pageable);
 }

@@ -112,6 +112,31 @@ export class NewSearchComponent {
   }
 
 
+  andJustLikeThat() {
+    const exp = [this.simpleQuery]
+    const payload = {
+      keywords: exp,
+      expression: [],
+      ranges: {},
+      isAsc: this.isAsc
+    }
 
+    this.http.post<any>(this.config.mlt_search_url, payload, { headers: { "Content-Type": "application/json" }})
+      .subscribe({
+        next: (res) => {this.results = res.content},
+        error: err => {console.log("MLT request failed", err)}
+      });
+  }
 
+  downloadPDF(serverFilename: string) {
+    this.http.get(this.config.getFileGetter(serverFilename), { responseType: 'blob' })
+      .subscribe((blob) => {
+        const a = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = serverFilename;
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+      });
+  }
 }

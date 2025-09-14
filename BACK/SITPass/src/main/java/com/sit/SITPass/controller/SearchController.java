@@ -28,4 +28,9 @@ public class SearchController {
                                            Pageable pageable) {
         return searchService.advancedSearch(advancedSearchQuery.expression(), advancedSearchQuery.ranges(),advancedSearchQuery.isAsc() ,pageable);
     }
+
+    @PostMapping("/mlt")
+    public Page<FacilityIndex> MLTSearch(@RequestBody SearchQueryDTO mltQuery, Pageable pageable) {
+        return searchService.MLTSearch(mltQuery.keywords().get(0), mltQuery.isAsc(), pageable);
+    }
 }
