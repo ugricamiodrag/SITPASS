@@ -74,6 +74,9 @@ public class FacilityController {
     @Autowired
     private ImageService imageService;
 
+    @Autowired
+    private FileService fileService;
+
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<FacilityDTO> createFacility(@RequestParam("name") String name,
@@ -93,11 +96,12 @@ public class FacilityController {
                 if (!photo.isEmpty()) {
                     byte[] bytes = photo.getBytes();
                     String fileName = photo.getOriginalFilename();
-                    Path path = Paths.get(uploadDir + File.separator + fileName);
+                    Path path = Paths.get(fileName);
                     Files.write(path, bytes);
 
                     Image image = new Image();
                     image.setPath(path.toString());
+                    fileService.store(photo, fileName);
                     allPhotos.add(image);
                 }
             }
@@ -204,14 +208,17 @@ public class FacilityController {
                 if (!photo.isEmpty()) {
                     byte[] bytes = photo.getBytes();
                     String fileName = photo.getOriginalFilename();
-                    Path path = Paths.get(uploadDir + File.separator + fileName);
+                    Path path = Paths.get(fileName);
                     Files.write(path, bytes);
-
+                    System.out.println("Received file: " + fileName + " | Size: " + photo.getSize());
+                    System.out.println("Saving file to path: " + path.toAbsolutePath());
                     Image image = new Image();
                     image.setPath(path.toString());
                     image.setFacility(existingFacility);
+                    fileService.store(photo, fileName);
                     imageService.updateImage(image);
                     newImages.add(image);
+                    System.out.println("File saved successfully: " + Files.exists(path));
                 }
             }
             existingFacility.setImages(newImages);
@@ -224,6 +231,7 @@ public class FacilityController {
                 System.out.println("Deleting " + photoPath);
                 Path path = Paths.get(photoPath);
                 Files.deleteIfExists(path);
+                fileService.delete(photoPath);
                 imageService.deleteImageByPath(photoPath);
             }
         }
@@ -243,18 +251,18 @@ public class FacilityController {
     @GetMapping("/{id}")
     public ResponseEntity<FacilityDTO> getFacility(@PathVariable Long id) {
         Optional<Facility> facility = facilityService.getFacility(id);
-
         if (facility.isPresent()) {
             Facility fac = facility.get();
             for (Image image : fac.getImages()) {
-                System.out.println(image);
+                System.out.println("Returning image path: " + image.getPath());
+                File f = new File(image.getPath());
+                System.out.println("File exists? " + f.exists() + " | Size: " + f.length());
             }
-            FacilityDTO facilityDTO = convertToDto(fac);
-            return ResponseEntity.ok(facilityDTO);
-        } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(convertToDto(fac));
         }
+        return ResponseEntity.notFound().build();
     }
+
 
     @GetMapping
     public ResponseEntity<List<FacilityDTO>> getAllFacilities() {
@@ -283,7 +291,7 @@ public class FacilityController {
         for (Facility facility : facilities) {
             System.out.println("Facility with rating: " + facility.getTotalRating());
             for (Image image : facility.getImages()) {
-                System.out.println("Image: " + image);
+                System.out.println("Image: " + image.getPath());
             }
         }
 

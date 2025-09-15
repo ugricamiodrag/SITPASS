@@ -39,7 +39,6 @@ public class SearchServiceImpl implements SearchService {
         System.out.println("Built simple search query: " + query);
 
 
-
         NativeQuery searchQuery = new NativeQueryBuilder()
                 .withQuery(query)
                 .withPageable(pageable)

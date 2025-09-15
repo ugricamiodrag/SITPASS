@@ -27,13 +27,19 @@ public class FileServiceImpl implements FileService {
         if (file.isEmpty()) {
             throw new RuntimeException("Failed to store empty file.");
         }
+
         var originalFilenameTokens =
                 Objects.requireNonNull(file.getOriginalFilename()).split("\\.");
         var extension = originalFilenameTokens[originalFilenameTokens.length - 1];
+
+
+        String baseName = serverFilename.replaceAll("\\.[^.]+$", "");
+        String finalFilename = baseName + "." + extension;
+
         try {
             PutObjectArgs args = PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(serverFilename + "." + extension)
+                    .object(finalFilename)
                     .headers(Collections.singletonMap("Content-Disposition",
                             "attachment; filename=\"" + file.getOriginalFilename() + "\""))
                     .stream(file.getInputStream(), file.getInputStream().available(), -1)
@@ -43,8 +49,9 @@ public class FileServiceImpl implements FileService {
             throw new RuntimeException("Error while storing file in Minio.");
         }
 
-        return serverFilename + "." + extension;
+        return finalFilename;
     }
+
 
     @Override
     public void delete(String serverFilename) {

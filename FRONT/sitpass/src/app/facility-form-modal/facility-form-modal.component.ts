@@ -133,18 +133,22 @@ export class FacilityFormModalComponent {
   }
 
   fetchImage(path: string, index: number): void {
-    this.imageService.getImage(path).subscribe({
+    console.log("Fetching image from path:", path);
+    const filename = path.replace(/^.*[\\\/]/, '');
+    this.imageService.getImage(filename).subscribe({
       next: response => {
+        console.log("Image received:", response);
+        console.log("Blob size:", response.size);
         const url = window.URL.createObjectURL(response);
         this.photoPaths[index] = this.sanitizer.bypassSecurityTrustUrl(url);
         this.cdr.detectChanges();
       },
       error: err => {
         console.error('Error fetching image:', err);
-        this.photoPaths[index] = ''; // fallback empty image
       }
     });
   }
+
 
   /** Document helpers */
   private fetchDocument(existingDocumentName: string) {
